@@ -2,7 +2,3 @@
 /.vscode
 /build
 /B_Clock Debug.launch
-/cmake
-/CMakeLists.txt
-/CMakePresets.json
-/vcpkg-configuration.json
