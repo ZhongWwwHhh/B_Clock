@@ -1,3 +1,4 @@
+/* USER CODE BEGIN 0 */
 #include <stdint.h>
 
 // 时间设定，应使用24小时制
@@ -34,3 +35,5 @@ extern struct Alarm_Setting alarm_setting;
 
 // 记录屏幕内容
 extern struct Screen screen;
+
+/* USER CODE END 0 */
