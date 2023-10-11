@@ -14,7 +14,7 @@ struct Alarm_Setting
     // 闹钟鸣响频率
     int8_t alarm_frequency;
     // 闹钟时间
-    Times time_alart;
+    struct Times time_alart;
 };
 
 // 显示控制
@@ -27,10 +27,10 @@ struct Screen
 };
 
 // 记录现在时间
-struct Times time_now;
+extern struct Times time_now;
 
 // 记录设置
-struct Alarm_Setting alarm_setting;
+extern struct Alarm_Setting alarm_setting;
 
 // 记录屏幕内容
-struct Screen screen;
+extern struct Screen screen;
