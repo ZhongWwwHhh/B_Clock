@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdlib.h>
 #include "struct_define.h"
+#include "time_control.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -129,11 +130,14 @@ int main(void)
   }
   else
   {
+    // 初始化时间为 00:00:00
     time_now.hour = 0;
     time_now.minute = 0;
     time_now.second = 0;
 
+    // 鸣响频率 1~10
     alarm_setting.alarm_frequency = 1;
+    // 初始化为不响铃
     alarm_setting.time_alart.hour = -1;
     alarm_setting.time_alart.minute = -1;
     alarm_setting.time_alart.second = -1;
