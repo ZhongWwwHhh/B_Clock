@@ -78,6 +78,7 @@ target_sources(
     "Core\\Src\\syscalls.c"
     "Core\\Src\\sysmem.c"
     "Core\\Src\\system_stm32f4xx.c"
+    "Core\\Src\\time_control.c"
     "Core\\Startup\\startup_stm32f401ccux.s"
     "Drivers\\STM32F4xx_HAL_Driver\\Src\\stm32f4xx_hal_cortex.c"
     "Drivers\\STM32F4xx_HAL_Driver\\Src\\stm32f4xx_hal_dma_ex.c"
