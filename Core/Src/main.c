@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdlib.h>
 #include "struct_define.h"
+#include "encoder_fun.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -139,38 +140,43 @@ int main(void)
     alarm_setting.time_alart.second = -1;
   }
 
+
+  int mode=0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    // int a,b;
+    // a=0;
+    // b=0;
+    // a,b=Spincount();
+    switch (mode)
+    {
+    case 0://显示时间/温度
+      
+      break;
+    case 1://设置时间
+      
+      break;
+    case 2://闹钟设置
+    
+      break;
+    case 3://蓝牙设置
+    
+      break;
+    
+    default:
+      break;
+    }
+    
+    
+    
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    // enc1_new = __HAL_TIM_GET_COUNTER(&htim3);
-    // if (enc1_new != enc1_old && abs(enc1_new - enc1_old) % 4 == 0)
-    // {
-    //   int i = 0;
-    //   if (abs(enc1_new - enc1_old) >= 10000)
-    //   {
-    //     i = 65536 - abs(enc1_new - enc1_old);
-    //   }
-    //   else
-    //   {
-    //     i = abs(enc1_new - enc1_old);
-    //   }
-    //   for (i = i / 4; i > 0; i--)
-    //   {
-    //     HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-    //     HAL_GPIO_TogglePin(BEEP_GPIO_Port, BEEP_Pin);
-    //     HAL_Delay(200);
-    //     HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-    //     HAL_GPIO_TogglePin(BEEP_GPIO_Port, BEEP_Pin);
-    //     HAL_Delay(200);
-    //   }
-    //   enc1_old = enc1_new;
-    // }
+
   }
   /* USER CODE END 3 */
 }
