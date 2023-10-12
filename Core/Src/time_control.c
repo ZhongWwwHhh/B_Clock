@@ -1,25 +1,25 @@
 /* USER CODE BEGIN 0 */
 
-#include "struct_define.h"
 #include "time_control.h"
+#include "struct_define.h"
 
 // 时间加一秒
-void time_add(struct Time *time)
+void time_add(Times *time_old)
 {
-    time.second++;
-    if (60 <= time.second)
+    time_old->second++;
+    if (60 <= time_old->second)
     {
-        time.second = 0;
-        time.minute++;
+        time_old->second = 0;
+        time_old->minute++;
     }
-    if (60 <= time.minute)
+    if (60 <= time_old->minute)
     {
-        time.minute = 0;
-        time.hour++;
+        time_old->minute = 0;
+        time_old->hour++;
     }
-    if (24 <= time.hour)
+    if (24 <= time_old->hour)
     {
-        time.hour = 0;
+        time_old->hour = 0;
     }
 }
 
