@@ -85,8 +85,7 @@ static void MX_TIM5_Init(void);
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-  HAL_GPIO_TogglePin(BEEP_GPIO_Port, BEEP_Pin);
+  alarm_setting.alarming_time += 10; // 按键蜂鸣提示
 }
 
 /* USER CODE END 0 */
@@ -153,7 +152,7 @@ int main(void)
     alarm_setting.time_alart.minute = -1;
     alarm_setting.time_alart.second = -1;
     // 不在响铃状态
-    alarm_setting.alarming = 0;
+    alarm_setting.alarming_time = 0;
   }
 
   /* USER CODE END 2 */
@@ -167,7 +166,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
     // 闲时LED保持呼吸，不响铃
-    if (!alarm_setting.alarming)
+    if (!alarm_setting.alarming_time)
     {
       // 不响铃
       HAL_GPIO_WritePin(BEEP_GPIO_Port, BEEP_Pin, GPIO_PIN_SET);
@@ -182,40 +181,19 @@ int main(void)
 
       if (led_control.LedpwmVal <= 0)
         led_control.LedpwmVal_Dir = 1; // 切换为PWM值递增状态
-
-      __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2, led_control.LedpwmVal);
     }
     else
     {
+      // 处理alarm
       HAL_GPIO_WritePin(BEEP_GPIO_Port, BEEP_Pin, GPIO_PIN_RESET);
+      led_control.LedpwmVal = 500; // 占空比100%
+      led_control.LedpwmVal_Dir = 0;
+      alarm_setting.alarming_time--; // 对alarm剩余时间减一单位
     }
+    __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2, led_control.LedpwmVal);
 
     // while 函数不用执行太快
     HAL_Delay(10);
-
-    // enc1_new = __HAL_TIM_GET_COUNTER(&htim3);
-    // if (enc1_new != enc1_old && abs(enc1_new - enc1_old) % 4 == 0)
-    // {
-    //   int i = 0;
-    //   if (abs(enc1_new - enc1_old) >= 10000)
-    //   {
-    //     i = 65536 - abs(enc1_new - enc1_old);
-    //   }
-    //   else
-    //   {
-    //     i = abs(enc1_new - enc1_old);
-    //   }
-    //   for (i = i / 4; i > 0; i--)
-    //   {
-    //     HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-    //     HAL_GPIO_TogglePin(BEEP_GPIO_Port, BEEP_Pin);
-    //     HAL_Delay(200);
-    //     HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-    //     HAL_GPIO_TogglePin(BEEP_GPIO_Port, BEEP_Pin);
-    //     HAL_Delay(200);
-    //   }
-    //   enc1_old = enc1_new;
-    // }
   }
   /* USER CODE END 3 */
 }

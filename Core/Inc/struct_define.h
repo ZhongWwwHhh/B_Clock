@@ -20,7 +20,7 @@ typedef struct
     // 闹钟时间
     Times time_alart;
     // 是否在响铃
-    int16_t alarming;
+    int16_t alarming_time;
 } Alarm_Setting;
 
 // 显示控制
