@@ -24,6 +24,8 @@
 #include <stdlib.h>
 #include "struct_define.h"
 #include "time_control.h"
+#include "oled.h"
+#include "oledfont.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -125,6 +127,9 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
+
+  // 初始化屏幕
+  OLED_Init();
 
   // 启用编码器计数
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
