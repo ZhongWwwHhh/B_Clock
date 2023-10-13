@@ -12,14 +12,14 @@
 #define OLED_SDA_Clr() HAL_GPIO_WritePin(GPIOA,GPIO_PIN_7, GPIO_PIN_RESET)//SDA
 #define OLED_SDA_Set() HAL_GPIO_WritePin(GPIOA,GPIO_PIN_7, GPIO_PIN_SET)
 
-#define OLED_RES_Clr() ;//RES
-#define OLED_RES_Set() ;
+#define OLED_RES_Clr() 0//RES
+#define OLED_RES_Set() 0
 
 #define OLED_DC_Clr() HAL_GPIO_WritePin(GPIOB,GPIO_PIN_0, GPIO_PIN_RESET)//DC
 #define OLED_DC_Set() HAL_GPIO_WritePin(GPIOB,GPIO_PIN_0, GPIO_PIN_SET)
  
-#define OLED_CS_Clr()  ;//CS
-#define OLED_CS_Set()  ;
+#define OLED_CS_Clr()  0//CS
+#define OLED_CS_Set()  0
 
 
 #define OLED_CMD  0	//д����
