@@ -61,6 +61,14 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define LED_Pin GPIO_PIN_1
 #define LED_GPIO_Port GPIOA
+#define SPI_Screen_CS_Pin GPIO_PIN_4
+#define SPI_Screen_CS_GPIO_Port GPIOA
+#define SPI_SCK_Pin GPIO_PIN_5
+#define SPI_SCK_GPIO_Port GPIOA
+#define SPI_Screen_RES_Pin GPIO_PIN_6
+#define SPI_Screen_RES_GPIO_Port GPIOA
+#define SPI_SDA_Pin GPIO_PIN_7
+#define SPI_SDA_GPIO_Port GPIOA
 #define SPI_Screen_DC_Pin GPIO_PIN_0
 #define SPI_Screen_DC_GPIO_Port GPIOB
 #define BEEP_Pin GPIO_PIN_13
