@@ -25,6 +25,7 @@
 #include "struct_define.h"
 #include "time_control.h"
 #include "oled.h"
+#include "error.h"
 // #include "oledfont.h"
 /* USER CODE END Includes */
 
@@ -56,14 +57,15 @@ UART_HandleTypeDef huart1;
 /* USER CODE BEGIN PV */
 
 // 定义来自 struct_define.h 的结构体
-// 记录现在时间
-Times time_now;
 // 记录设置
 Alarm_Setting alarm_setting;
 // 记录屏幕内容
 Screen screen;
 // LED pwm 控制
 Led_Control led_control = {0, 1}; // LED 呼吸灯控制
+
+// 记录现在时间的RTC
+RTC_TimeTypeDef time_now;
 
 /* USER CODE END PV */
 
@@ -86,7 +88,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
   if (GPIO_Pin == KEY_Pin)
   {
-    alarm_setting.alarming_time += 10; // 按键蜂鸣提示
+    alarm_setting.alarming_time = 10; // 按键蜂鸣提示
   }
 }
 
@@ -127,6 +129,9 @@ int main(void)
   MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
 
+  // 初始化状态检测
+  HAL_StatusTypeDef status_test;
+
   // 初始化屏幕
   OLED_Init();
 
@@ -136,32 +141,16 @@ int main(void)
   // 启动LED的PWM
   HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_2);
 
-  // 初始化时间和设置
-  // 读取设置
-  if (0 /*这里flash获取*/)
-  {
-    ;
-  }
-  else
-  {
-    // 初始化时间为 00:00:00
-    time_now.hour = 0;
-    time_now.minute = 0;
-    time_now.second = 0;
+  // 鸣响频率 1~10
+  alarm_setting.alarm_frequency = 1;
+  // 初始化为不响铃
+  alarm_setting.time_alart.hour = -1;
+  alarm_setting.time_alart.minute = -1;
+  alarm_setting.time_alart.second = -1;
+  // 不在响铃状态
+  alarm_setting.alarming_time = 0;
 
-    // 鸣响频率 1~10
-    alarm_setting.alarm_frequency = 1;
-    // 初始化为不响铃
-    alarm_setting.time_alart.hour = -1;
-    alarm_setting.time_alart.minute = -1;
-    alarm_setting.time_alart.second = -1;
-    // 不在响铃状态
-    alarm_setting.alarming_time = 0;
-  }
-
-  // 测试
-  OLED_ShowNum(1, 1, 5, 1, 32, 1);
-  OLED_Refresh();
+  // 开启oled
   OLED_DisPlay_On();
 
   /* USER CODE END 2 */
@@ -181,28 +170,44 @@ int main(void)
       HAL_GPIO_WritePin(BEEP_GPIO_Port, BEEP_Pin, GPIO_PIN_SET);
       // 呼吸
       if (led_control.LedpwmVal_Dir)
-        led_control.LedpwmVal += 5;
+        led_control.LedpwmVal += 2;
       else
-        led_control.LedpwmVal -= 5;
+        led_control.LedpwmVal -= 2;
 
-      if (led_control.LedpwmVal >= 499)
+      if (led_control.LedpwmVal >= 90)
         led_control.LedpwmVal_Dir = 0; // 切换为PWM值递减状态
 
-      if (led_control.LedpwmVal <= 0)
+      if (led_control.LedpwmVal <= 10)
         led_control.LedpwmVal_Dir = 1; // 切换为PWM值递增状态
     }
     else
     {
       // 处理alarm
       HAL_GPIO_WritePin(BEEP_GPIO_Port, BEEP_Pin, GPIO_PIN_RESET);
-      led_control.LedpwmVal = 500; // 占空比100%
+      led_control.LedpwmVal = 10; // 占空比100%
       led_control.LedpwmVal_Dir = 0;
       alarm_setting.alarming_time--; // 对alarm剩余时间减一单位
     }
     __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2, led_control.LedpwmVal);
 
+    // 循环获取时间
+    status_test = HAL_RTC_GetTime(&hrtc, &time_now, RTC_FORMAT_BIN);
+    if (status_test != HAL_OK)
+    {
+      error_show();
+      return HAL_ERROR;
+    }
+
+    OLED_ShowNum(16, 5, time_now.Hours, 2, 24, 1);
+    OLED_ShowChar(40, 5, ':', 24, 1);
+    OLED_ShowNum(52, 5, time_now.Minutes, 2, 24, 1);
+    OLED_ShowChar(76, 5, ':', 24, 1);
+    OLED_ShowNum(88, 5, time_now.Seconds, 2, 24, 1);
+
+    OLED_Refresh();
+
     // while 函数不用执行太快
-    HAL_Delay(10);
+    HAL_Delay(5);
   }
   /* USER CODE END 3 */
 }
@@ -301,6 +306,9 @@ static void MX_RTC_Init(void)
 
   /* USER CODE END RTC_Init 0 */
 
+  RTC_TimeTypeDef sTime = {0};
+  RTC_DateTypeDef sDate = {0};
+
   /* USER CODE BEGIN RTC_Init 1 */
 
   /* USER CODE END RTC_Init 1 */
@@ -315,6 +323,31 @@ static void MX_RTC_Init(void)
   hrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
   hrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
   if (HAL_RTC_Init(&hrtc) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /* USER CODE BEGIN Check_RTC_BKUP */
+
+  /* USER CODE END Check_RTC_BKUP */
+
+  /** Initialize RTC and set the Time and Date
+   */
+  sTime.Hours = 0;
+  sTime.Minutes = 0;
+  sTime.Seconds = 0;
+  sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
+  sTime.StoreOperation = RTC_STOREOPERATION_RESET;
+  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sDate.WeekDay = RTC_WEEKDAY_MONDAY;
+  sDate.Month = RTC_MONTH_JANUARY;
+  sDate.Date = 1;
+  sDate.Year = 0;
+
+  if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN) != HAL_OK)
   {
     Error_Handler();
   }
@@ -390,9 +423,9 @@ static void MX_TIM5_Init(void)
 
   /* USER CODE END TIM5_Init 1 */
   htim5.Instance = TIM5;
-  htim5.Init.Prescaler = 71;
+  htim5.Init.Prescaler = 7199;
   htim5.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim5.Init.Period = 499;
+  htim5.Init.Period = 99;
   htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim5.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_PWM_Init(&htim5) != HAL_OK)

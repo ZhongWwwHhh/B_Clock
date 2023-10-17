@@ -72,6 +72,7 @@ target_link_options(
 
 target_sources(
     ${TARGET_NAME} PRIVATE
+    "Core\\Src\\error.c"
     "Core\\Src\\main.c"
     "Core\\Src\\oled.c"
     "Core\\Src\\stm32f4xx_hal_msp.c"
