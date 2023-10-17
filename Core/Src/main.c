@@ -57,15 +57,14 @@ UART_HandleTypeDef huart1;
 /* USER CODE BEGIN PV */
 
 // 定义来自 struct_define.h 的结构体
+// 记录时间
+Times time_now;
 // 记录设置
 Alarm_Setting alarm_setting;
 // 记录屏幕内容
 Screen screen;
 // LED pwm 控制
 Led_Control led_control = {0, 1}; // LED 呼吸灯控制
-
-// 记录现在时间的RTC
-RTC_TimeTypeDef time_now;
 
 /* USER CODE END PV */
 
@@ -90,6 +89,16 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   {
     alarm_setting.alarming_time = 10; // 按键蜂鸣提示
   }
+  return;
+}
+
+void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
+{
+  /* Prevent unused argument(s) compilation warning */
+  UNUSED(hrtc);
+
+  time_add(&time_now);
+  return;
 }
 
 /* USER CODE END 0 */
@@ -174,40 +183,32 @@ int main(void)
       else
         led_control.LedpwmVal -= 2;
 
-      if (led_control.LedpwmVal >= 90)
+      if (led_control.LedpwmVal >= 98)
         led_control.LedpwmVal_Dir = 0; // 切换为PWM值递减状态
 
-      if (led_control.LedpwmVal <= 10)
+      if (led_control.LedpwmVal <= 1)
         led_control.LedpwmVal_Dir = 1; // 切换为PWM值递增状态
     }
     else
     {
       // 处理alarm
       HAL_GPIO_WritePin(BEEP_GPIO_Port, BEEP_Pin, GPIO_PIN_RESET);
-      led_control.LedpwmVal = 10; // 占空比100%
-      led_control.LedpwmVal_Dir = 0;
+      led_control.LedpwmVal = 0; // 占空比100%
+      led_control.LedpwmVal_Dir = 1;
       alarm_setting.alarming_time--; // 对alarm剩余时间减一单位
     }
     __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2, led_control.LedpwmVal);
 
-    // 循环获取时间
-    status_test = HAL_RTC_GetTime(&hrtc, &time_now, RTC_FORMAT_BIN);
-    if (status_test != HAL_OK)
-    {
-      error_show();
-      return HAL_ERROR;
-    }
-
-    OLED_ShowNum(16, 5, time_now.Hours, 2, 24, 1);
+    OLED_ShowNum(16, 5, time_now.hour, 2, 24, 1);
     OLED_ShowChar(40, 5, ':', 24, 1);
-    OLED_ShowNum(52, 5, time_now.Minutes, 2, 24, 1);
+    OLED_ShowNum(52, 5, time_now.minute, 2, 24, 1);
     OLED_ShowChar(76, 5, ':', 24, 1);
-    OLED_ShowNum(88, 5, time_now.Seconds, 2, 24, 1);
+    OLED_ShowNum(88, 5, time_now.second, 2, 24, 1);
 
     OLED_Refresh();
 
     // while 函数不用执行太快
-    HAL_Delay(5);
+    HAL_Delay(10);
   }
   /* USER CODE END 3 */
 }
@@ -308,6 +309,7 @@ static void MX_RTC_Init(void)
 
   RTC_TimeTypeDef sTime = {0};
   RTC_DateTypeDef sDate = {0};
+  RTC_AlarmTypeDef sAlarm = {0};
 
   /* USER CODE BEGIN RTC_Init 1 */
 
@@ -348,6 +350,24 @@ static void MX_RTC_Init(void)
   sDate.Year = 0;
 
   if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Enable the Alarm A
+   */
+  sAlarm.AlarmTime.Hours = 0;
+  sAlarm.AlarmTime.Minutes = 0;
+  sAlarm.AlarmTime.Seconds = 0;
+  sAlarm.AlarmTime.SubSeconds = 0;
+  sAlarm.AlarmTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
+  sAlarm.AlarmTime.StoreOperation = RTC_STOREOPERATION_RESET;
+  sAlarm.AlarmMask = RTC_ALARMMASK_ALL;
+  sAlarm.AlarmSubSecondMask = RTC_ALARMSUBSECONDMASK_ALL;
+  sAlarm.AlarmDateWeekDaySel = RTC_ALARMDATEWEEKDAYSEL_DATE;
+  sAlarm.AlarmDateWeekDay = 1;
+  sAlarm.Alarm = RTC_ALARM_A;
+  if (HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BIN) != HAL_OK)
   {
     Error_Handler();
   }
