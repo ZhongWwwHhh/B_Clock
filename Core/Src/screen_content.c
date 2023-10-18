@@ -41,7 +41,7 @@ void screen_show(int8_t *screen_display_num, int8_t *clean_display)
         OLED_ShowNum(80, 28, Tempdata.Decimals, 1, 16, 1);
 
         // 显示提示
-        OLED_ShowString(16, 46, "Press to setting", 8, 1);
+        OLED_ShowString(16, 50, "Press to setting", 8, 1);
         break;
 
     default:
