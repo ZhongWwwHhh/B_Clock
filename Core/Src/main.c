@@ -26,6 +26,7 @@
 #include "time_control.h"
 #include "oled.h"
 #include "error.h"
+#include "LM75A.h"
 // #include "oledfont.h"
 /* USER CODE END Includes */
 
@@ -65,6 +66,9 @@ Alarm_Setting alarm_setting;
 Screen screen;
 // LED pwm 控制
 Led_Control led_control = {0, 1}; // LED 呼吸灯控制
+
+// 记录温度
+extern TempDataStruct Tempdata;
 
 /* USER CODE END PV */
 
