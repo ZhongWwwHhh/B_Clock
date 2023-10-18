@@ -4,6 +4,8 @@
 TempDataStruct Tempdata = {0};
 uint8_t Sign = ' '; // 温度符号
 
+extern I2C_HandleTypeDef hi2c1;
+
 void LM75A_GetTemperature(void)
 {
     /*

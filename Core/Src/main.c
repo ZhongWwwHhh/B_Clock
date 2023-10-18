@@ -203,11 +203,23 @@ int main(void)
     }
     __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2, led_control.LedpwmVal);
 
-    OLED_ShowNum(16, 5, time_now.hour, 2, 24, 1);
-    OLED_ShowChar(40, 5, ':', 24, 1);
-    OLED_ShowNum(52, 5, time_now.minute, 2, 24, 1);
-    OLED_ShowChar(76, 5, ':', 24, 1);
-    OLED_ShowNum(88, 5, time_now.second, 2, 24, 1);
+    // 显示时间
+    OLED_ShowNum(16, 2, time_now.hour, 2, 24, 1);
+    OLED_ShowChar(40, 2, ':', 24, 1);
+    OLED_ShowNum(52, 2, time_now.minute, 2, 24, 1);
+    OLED_ShowChar(76, 2, ':', 24, 1);
+    OLED_ShowNum(88, 2, time_now.second, 2, 24, 1);
+
+    // 显示温度
+    LM75A_GetTemperature();
+    OLED_ShowString(16, 28, "TEMP:", 16, 1);
+    OLED_ShowNum(56, 28, Tempdata.Tens, 1, 16, 1);
+    OLED_ShowNum(64, 28, Tempdata.Unit, 1, 16, 1);
+    OLED_ShowChar(72, 28, '.', 16, 1);
+    OLED_ShowNum(80, 28, Tempdata.Decimals, 1, 16, 1);
+
+    // 显示提示
+    OLED_ShowString(16, 46, "Press to setting", 8, 1);
 
     OLED_Refresh();
 

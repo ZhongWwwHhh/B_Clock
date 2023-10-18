@@ -2,7 +2,7 @@
 #ifndef __LM75AD_H__
 #define __LM75AD_H__
 
-// #include "i2c.h"
+#include "main.h"
 #include <stdint.h>
 
 typedef struct
