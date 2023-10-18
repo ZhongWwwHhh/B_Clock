@@ -27,6 +27,7 @@
 #include "oled.h"
 #include "error.h"
 #include "LM75A.h"
+#include "screen_content.h"
 // #include "oledfont.h"
 /* USER CODE END Includes */
 
@@ -166,6 +167,16 @@ int main(void)
   // 开启oled
   OLED_DisPlay_On();
 
+  // 0.显示开机画面
+  screen.screen_display_num = 0;
+  screen.clean_display = 1;
+  screen_show(&screen.screen_display_num, &screen.clean_display);
+  HAL_Delay(3000);
+
+  // 1.显示主界面
+  screen.screen_display_num = 1;
+  screen.clean_display = 1;
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -203,25 +214,7 @@ int main(void)
     }
     __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2, led_control.LedpwmVal);
 
-    // 显示时间
-    OLED_ShowNum(16, 2, time_now.hour, 2, 24, 1);
-    OLED_ShowChar(40, 2, ':', 24, 1);
-    OLED_ShowNum(52, 2, time_now.minute, 2, 24, 1);
-    OLED_ShowChar(76, 2, ':', 24, 1);
-    OLED_ShowNum(88, 2, time_now.second, 2, 24, 1);
-
-    // 显示温度
-    LM75A_GetTemperature();
-    OLED_ShowString(16, 28, "TEMP:", 16, 1);
-    OLED_ShowNum(56, 28, Tempdata.Tens, 1, 16, 1);
-    OLED_ShowNum(64, 28, Tempdata.Unit, 1, 16, 1);
-    OLED_ShowChar(72, 28, '.', 16, 1);
-    OLED_ShowNum(80, 28, Tempdata.Decimals, 1, 16, 1);
-
-    // 显示提示
-    OLED_ShowString(16, 46, "Press to setting", 8, 1);
-
-    OLED_Refresh();
+      screen_show(&screen.screen_display_num, &screen.clean_display);
 
     // while 函数不用执行太快
     HAL_Delay(10);

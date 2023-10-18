@@ -27,7 +27,7 @@ typedef struct
 typedef struct
 {
     // 需要显示的界面编号
-    int8_t screen_display;
+    int8_t screen_display_num;
     // 每次刷新屏幕置为1，刷新后自动置零
     int8_t clean_display;
 } Screen;

@@ -76,6 +76,7 @@ target_sources(
     "Core\\Src\\LM75A.c"
     "Core\\Src\\main.c"
     "Core\\Src\\oled.c"
+    "Core\\Src\\screen_content.c"
     "Core\\Src\\stm32f4xx_hal_msp.c"
     "Core\\Src\\stm32f4xx_it.c"
     "Core\\Src\\syscalls.c"
