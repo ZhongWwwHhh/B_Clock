@@ -2,6 +2,7 @@
 #include "screen_content.h"
 
 extern Times time_now;
+extern Alarm_Setting alarm_setting;
 extern TempDataStruct Tempdata;
 extern Encoder_State encoder_state;
 extern Screen screen;
@@ -50,9 +51,41 @@ void screen_show(int8_t *screen_display_num, int8_t *clean_display)
             // 限定选择范围
             screen.screen_display_choose = 0;
         }
-        OLED_ShowString(0, 02, "Back            ", 12, screen.screen_display_choose == 0 ? 0 : 1);
-        OLED_ShowString(0, 16, "Time Setting    ", 12, screen.screen_display_choose == 1 ? 0 : 1);
-        OLED_ShowString(0, 30, "Bluetooth Reset ", 12, screen.screen_display_choose == 2 ? 0 : 1);
+        OLED_ShowString(0, 02, " Back            ", 12, screen.screen_display_choose == 0 ? 0 : 1);
+        OLED_ShowString(0, 16, " Time Setting    ", 12, screen.screen_display_choose == 1 ? 0 : 1);
+        OLED_ShowString(0, 30, " Bluetooth       ", 12, screen.screen_display_choose == 2 ? 0 : 1);
+        break;
+
+    case 3: // 蓝牙画面
+        OLED_ShowString(0, 2, "PIN: 1234", 16, 1);
+        OLED_ShowString(0, 20, "Connect and Set", 8, 1);
+        OLED_ShowString(16, 50, "Press to back", 8, 1);
+        break;
+
+    case 4: // 时间设定界面
+        if (screen.screen_display_choose > 5)
+        {
+            // 已经完成设置，回主界面
+            screen.screen_display_num = 1;
+            screen.screen_display_choose = -1;
+            screen.clean_display = 1;
+            break;
+        }
+        OLED_ShowString(0, 2, "Now:", 8, 1);
+        OLED_ShowString(0, 12, "Hour:", 8, screen.screen_display_choose == 0 ? 0 : 1);
+        OLED_ShowNum(30, 12, time_now.hour, 2, 8, screen.screen_display_choose == 0 ? 0 : 1);
+        OLED_ShowString(50, 12, "Minute:", 8, screen.screen_display_choose == 1 ? 0 : 1);
+        OLED_ShowNum(92, 12, time_now.minute, 2, 8, screen.screen_display_choose == 1 ? 0 : 1);
+        OLED_ShowString(0, 22, "Second:", 8, screen.screen_display_choose == 2 ? 0 : 1);
+        OLED_ShowNum(42, 22, time_now.second, 2, 8, screen.screen_display_choose == 2 ? 0 : 1);
+
+        OLED_ShowString(0, 32, "Alarm:", 8, 1);
+        OLED_ShowString(0, 42, "Hour:", 8, screen.screen_display_choose == 3 ? 0 : 1);
+        OLED_ShowNum(30, 42, alarm_setting.time_alart.hour, 2, 8, screen.screen_display_choose == 3 ? 0 : 1);
+        OLED_ShowString(50, 42, "Minute:", 8, screen.screen_display_choose == 4 ? 0 : 1);
+        OLED_ShowNum(92, 42, alarm_setting.time_alart.minute, 2, 8, screen.screen_display_choose == 4 ? 0 : 1);
+        OLED_ShowString(0, 52, "Second:", 8, screen.screen_display_choose == 5 ? 0 : 1);
+        OLED_ShowNum(42, 52, alarm_setting.time_alart.second, 2, 8, screen.screen_display_choose == 5 ? 0 : 1);
         break;
     };
 
