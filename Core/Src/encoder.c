@@ -26,22 +26,25 @@ void encoder_get_state(void)
         // 有转动，先判定是否经过0
         if (encoder_diff > 10000)
         {
-            // 处理经过零的部分
-            encoder_diff = 65536 - encoder_diff;
+            encoder_diff = encoder_diff - 65536;
+        }
+        if (encoder_diff < -10000)
+        {
+            encoder_diff = 65536 + encoder_diff;
         }
 
         // 处理转了几格
         if (encoder_diff > 0)
         {
             // 正转
-            encoder_state.Left = encoder_diff / 4;
-            encoder_diff = encoder_diff % 4;
+            encoder_state.Left += encoder_diff / 4;
+            encoder_diff %= 4;
         }
         else
         {
             // 反转
-            encoder_state.Right = -encoder_diff / 4;
-            encoder_diff = encoder_diff % 4;
+            encoder_state.Right -= encoder_diff / 4;
+            encoder_diff %= 4;
         }
 
         // 更改encoder_old值

@@ -121,6 +121,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   {
     // 获取温度
     LM75A_GetTemperature();
+
+    // 获取encoder值
+    encoder_get_state();
   }
 }
 
