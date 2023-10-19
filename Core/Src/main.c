@@ -110,6 +110,19 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
   return;
 }
 
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* Prevent unused argument(s) compilation warning */
+  UNUSED(htim);
+
+  // 确认是tim2 10hz中断
+  if (htim == &htim2)
+  {
+    // 获取温度
+    LM75A_GetTemperature();
+  }
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -413,7 +426,7 @@ static void MX_TIM2_Init(void)
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim2.Init.Period = 999;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
   {
     Error_Handler();

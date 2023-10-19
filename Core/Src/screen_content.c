@@ -33,7 +33,6 @@ void screen_show(int8_t *screen_display_num, int8_t *clean_display)
         OLED_ShowNum(88, 2, time_now.second, 2, 24, 1);
 
         // 显示温度
-        LM75A_GetTemperature();
         OLED_ShowString(16, 28, "TEMP:", 16, 1);
         OLED_ShowNum(56, 28, Tempdata.Tens, 1, 16, 1);
         OLED_ShowNum(64, 28, Tempdata.Unit, 1, 16, 1);
