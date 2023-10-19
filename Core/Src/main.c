@@ -28,6 +28,7 @@
 #include "error.h"
 #include "LM75A.h"
 #include "screen_content.h"
+#include "encoder.h"
 // #include "oledfont.h"
 /* USER CODE END Includes */
 
@@ -116,7 +117,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   UNUSED(htim);
 
   // 确认是tim2 10hz中断
-  if (htim == &htim2)
+  if (htim == (&htim2))
   {
     // 获取温度
     LM75A_GetTemperature();
@@ -169,6 +170,9 @@ int main(void)
 
   // 启用编码器计数
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
+
+  // 启用tim2 10hz
+  HAL_TIM_Base_Start_IT(&htim2);
 
   // 启动LED的PWM
   HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_2);
