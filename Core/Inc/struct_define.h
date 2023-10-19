@@ -39,6 +39,13 @@ typedef struct
     uint8_t LedpwmVal_Dir : 1; // 调整方向，1-递增，0递减
 } Led_Control;
 
+// 编码器状态
+typedef struct
+{
+    uint8_t Left;
+    uint8_t Right;
+} Encoder_State;
+
 #endif
 
 /* USER CODE END 0 */
