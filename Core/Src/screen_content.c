@@ -23,7 +23,6 @@ void screen_show(int8_t *screen_display_num, int8_t *clean_display)
         OLED_ShowString(0, 35, "2023010911021", 8, 1);
         OLED_ShowString(0, 44, "2023010911030", 8, 1);
         OLED_ShowString(0, 53, "2023010911011", 8, 1);
-
         break;
 
     case 1: // 主屏幕
@@ -43,18 +42,17 @@ void screen_show(int8_t *screen_display_num, int8_t *clean_display)
 
         // 显示提示
         OLED_ShowString(16, 50, "Press to setting", 8, 1);
-
         break;
 
-    case 2:
-        OLED_ShowString(0, 02, "Back            ", 12, screen.screen_display_choose == 0 ? 0 : 1);
-        OLED_ShowString(0, 16, "Time Setting    ", 12, screen.screen_display_choose == 1 ? 0 : 1);
-        OLED_ShowString(0, 30, "Bluetooth Reset ", 12, screen.screen_display_choose == 2 ? 0 : 1);
+    case 2: // 设置画面
         if (screen.screen_display_choose < 0 || screen.screen_display_choose > 2)
         {
             // 限定选择范围
             screen.screen_display_choose = 0;
         }
+        OLED_ShowString(0, 02, "Back            ", 12, screen.screen_display_choose == 0 ? 0 : 1);
+        OLED_ShowString(0, 16, "Time Setting    ", 12, screen.screen_display_choose == 1 ? 0 : 1);
+        OLED_ShowString(0, 30, "Bluetooth Reset ", 12, screen.screen_display_choose == 2 ? 0 : 1);
         break;
     };
 
