@@ -97,7 +97,37 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
   if (GPIO_Pin == KEY_Pin)
   {
-    alarm_setting.alarming_time = 10; // 按键蜂鸣提示
+    // 按键蜂鸣提示
+    alarm_setting.alarming_time = 10;
+
+    // 按界面分情况
+    switch (screen.screen_display_num)
+    {
+    case 0: // 开机屏幕，忽略
+      break;
+    case 1: // 主界面，进设置
+      screen.screen_display_num = 2;
+      screen.screen_display_choose = 0;
+      screen.clean_display = 1;
+      break;
+    case 2: // 设置界面，看选择
+      switch (screen.screen_display_choose)
+      {
+      case 0: // 回主界面
+        screen.screen_display_num = 1;
+        screen.screen_display_choose = -1;
+        screen.clean_display = 1;
+        break;
+      case 1: // 进入时间设定界面
+        break;
+      case 2: // 重置蓝牙
+        break;
+
+      default:
+        break;
+      }
+      break;
+    }
   }
   return;
 }
@@ -124,6 +154,20 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
     // 获取encoder值
     encoder_get_state();
+
+    // 根据界面决定encoder值更改位置
+    switch (screen.screen_display_num)
+    {
+    case 0: // 开机界面，丢弃
+      break;
+    case 1: // 主界面，丢弃
+      break;
+    case 2: // 设置界面，选择条目
+      screen.screen_display_choose += encoder_state.Right - encoder_state.Left;
+      break;
+    }
+    encoder_state.Left = 0;
+    encoder_state.Right = 0;
   }
 }
 
@@ -194,6 +238,7 @@ int main(void)
 
   // 0.显示开机画面
   screen.screen_display_num = 0;
+  screen.screen_display_choose = -1;
   screen.clean_display = 1;
   screen_show(&screen.screen_display_num, &screen.clean_display);
   HAL_Delay(3000);

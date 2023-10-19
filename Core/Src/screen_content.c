@@ -4,6 +4,7 @@
 extern Times time_now;
 extern TempDataStruct Tempdata;
 extern Encoder_State encoder_state;
+extern Screen screen;
 
 void screen_show(int8_t *screen_display_num, int8_t *clean_display)
 {
@@ -42,13 +43,18 @@ void screen_show(int8_t *screen_display_num, int8_t *clean_display)
 
         // 显示提示
         OLED_ShowString(16, 50, "Press to setting", 8, 1);
-        // test
-        OLED_ShowNum(16, 50, encoder_state.Left, 3, 8, 1);
-        OLED_ShowNum(50, 50, encoder_state.Right, 3, 8, 1);
 
         break;
 
-    default:
+    case 2:
+        OLED_ShowString(0, 02, "Back            ", 12, screen.screen_display_choose == 0 ? 0 : 1);
+        OLED_ShowString(0, 16, "Time Setting    ", 12, screen.screen_display_choose == 1 ? 0 : 1);
+        OLED_ShowString(0, 30, "Bluetooth Reset ", 12, screen.screen_display_choose == 2 ? 0 : 1);
+        if (screen.screen_display_choose < 0 || screen.screen_display_choose > 2)
+        {
+            // 限定选择范围
+            screen.screen_display_choose = 0;
+        }
         break;
     };
 
