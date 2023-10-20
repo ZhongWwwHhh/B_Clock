@@ -98,7 +98,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   if (GPIO_Pin == KEY_Pin)
   {
     // 按键蜂鸣提示
-    // alarm_setting.alarming_time = 10;
+    alarm_setting.alarming_time = 50;
 
     // 按界面分情况
     switch (screen.screen_display_num)
@@ -265,6 +265,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     // 丢弃
     encoder_state.Left = 0;
     encoder_state.Right = 0;
+
+    // 屏显
+    screen_show(&screen.screen_display_num, &screen.clean_display);
   }
 }
 
@@ -322,7 +325,7 @@ int main(void)
   HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_2);
 
   // 鸣响频率 1~10
-  alarm_setting.alarm_frequency = 1;
+  alarm_setting.alarm_frequency = 5;
   // 初始化为不响铃
   alarm_setting.time_alart.hour = 0;
   alarm_setting.time_alart.minute = 0;
@@ -374,14 +377,23 @@ int main(void)
     else
     {
       // 处理alarm
-      HAL_GPIO_WritePin(BEEP_GPIO_Port, BEEP_Pin, GPIO_PIN_RESET);
-      led_control.LedpwmVal = 0; // 占空比100%
-      led_control.LedpwmVal_Dir = 1;
-      alarm_setting.alarming_time--; // 对alarm剩余时间减一单位
-    }
-    __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2, led_control.LedpwmVal);
+      if ((alarm_setting.alarming_time / (500 / alarm_setting.alarm_frequency)) % 2 != 0)
+      {
+        HAL_GPIO_WritePin(BEEP_GPIO_Port, BEEP_Pin, GPIO_PIN_RESET);
+        led_control.LedpwmVal = 0; // 占空比100%
+        led_control.LedpwmVal_Dir = 1;
+      }
+      else
+      {
+        HAL_GPIO_WritePin(BEEP_GPIO_Port, BEEP_Pin, GPIO_PIN_SET);
+        led_control.LedpwmVal = 100; // 占空比0%
+        led_control.LedpwmVal_Dir = 0;
+      }
 
-    screen_show(&screen.screen_display_num, &screen.clean_display);
+      alarm_setting.alarming_time -= 10; // 对alarm剩余时间减一单位
+    }
+    // 更新led pwm配置
+    __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2, led_control.LedpwmVal);
 
     // while 函数不用执行太快
     HAL_Delay(10);
