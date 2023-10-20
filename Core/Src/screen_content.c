@@ -46,14 +46,15 @@ void screen_show(int8_t *screen_display_num, int8_t *clean_display)
         break;
 
     case 2: // 设置画面
-        if (screen.screen_display_choose < 0 || screen.screen_display_choose > 2)
+        if (screen.screen_display_choose < 0 || screen.screen_display_choose > 3)
         {
             // 限定选择范围
             screen.screen_display_choose = 0;
         }
         OLED_ShowString(0, 02, " Back            ", 12, screen.screen_display_choose == 0 ? 0 : 1);
         OLED_ShowString(0, 16, " Time Setting    ", 12, screen.screen_display_choose == 1 ? 0 : 1);
-        OLED_ShowString(0, 30, " Bluetooth       ", 12, screen.screen_display_choose == 2 ? 0 : 1);
+        OLED_ShowString(0, 30, " Alarm Setting   ", 12, screen.screen_display_choose == 2 ? 0 : 1);
+        OLED_ShowString(0, 44, " Bluetooth       ", 12, screen.screen_display_choose == 3 ? 0 : 1);
         break;
 
     case 3: // 蓝牙画面
@@ -63,7 +64,7 @@ void screen_show(int8_t *screen_display_num, int8_t *clean_display)
         break;
 
     case 4: // 时间设定界面
-        if (screen.screen_display_choose > 5)
+        if (screen.screen_display_choose > 2)
         {
             // 已经完成设置，回主界面
             screen.screen_display_num = 1;
@@ -79,14 +80,26 @@ void screen_show(int8_t *screen_display_num, int8_t *clean_display)
         OLED_ShowString(0, 22, "Second:", 8, screen.screen_display_choose == 2 ? 0 : 1);
         OLED_ShowNum(42, 22, time_now.second, 2, 8, screen.screen_display_choose == 2 ? 0 : 1);
 
-        OLED_ShowString(0, 32, "Alarm:", 8, 1);
-        OLED_ShowString(0, 42, "Hour:", 8, screen.screen_display_choose == 3 ? 0 : 1);
-        OLED_ShowNum(30, 42, alarm_setting.time_alart.hour, 2, 8, screen.screen_display_choose == 3 ? 0 : 1);
-        OLED_ShowString(50, 42, "Minute:", 8, screen.screen_display_choose == 4 ? 0 : 1);
-        OLED_ShowNum(92, 42, alarm_setting.time_alart.minute, 2, 8, screen.screen_display_choose == 4 ? 0 : 1);
-        OLED_ShowString(0, 52, "Second:", 8, screen.screen_display_choose == 5 ? 0 : 1);
-        OLED_ShowNum(42, 52, alarm_setting.time_alart.second, 2, 8, screen.screen_display_choose == 5 ? 0 : 1);
         break;
+
+    case 5: // 时间设定界面
+        if (screen.screen_display_choose > 3)
+        {
+            // 已经完成设置，回主界面
+            screen.screen_display_num = 1;
+            screen.screen_display_choose = -1;
+            screen.clean_display = 1;
+            break;
+        }
+        OLED_ShowString(0, 2, "Alarm:", 8, 1);
+        OLED_ShowString(0, 12, "Hour:", 8, screen.screen_display_choose == 0 ? 0 : 1);
+        OLED_ShowNum(30, 12, alarm_setting.time_alart.hour, 2, 8, screen.screen_display_choose == 0 ? 0 : 1);
+        OLED_ShowString(50, 12, "Minute:", 8, screen.screen_display_choose == 1 ? 0 : 1);
+        OLED_ShowNum(92, 12, alarm_setting.time_alart.minute, 2, 8, screen.screen_display_choose == 1 ? 0 : 1);
+        OLED_ShowString(0, 22, "Second:", 8, screen.screen_display_choose == 2 ? 0 : 1);
+        OLED_ShowNum(42, 22, alarm_setting.time_alart.second, 2, 8, screen.screen_display_choose == 2 ? 0 : 1);
+        OLED_ShowString(0, 32, "Frequency:", 8, screen.screen_display_choose == 3 ? 0 : 1);
+        OLED_ShowNum(60, 32, alarm_setting.alarm_frequency, 2, 8, screen.screen_display_choose == 3 ? 0 : 1);
     };
 
     OLED_Refresh();

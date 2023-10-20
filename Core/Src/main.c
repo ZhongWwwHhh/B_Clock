@@ -125,7 +125,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         screen.screen_display_choose = 0;
         screen.clean_display = 1;
         break;
-      case 2: // 进入蓝牙界面
+      case 2: // 进入闹钟设定界面
+        screen.screen_display_num = 5;
+        screen.screen_display_choose = 0;
+        screen.clean_display = 1;
+        break;
+      case 3: // 进入蓝牙界面
         screen.screen_display_num = 3;
         screen.screen_display_choose = -1;
         screen.clean_display = 1;
@@ -142,6 +147,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     case 4: // 时间设定界面，进入下一项，直到结束
       screen.screen_display_choose++;
       break;
+
+    case 5: // 闹钟设定界面，进入下一项，直到结束
+      screen.screen_display_choose++;
+      break;
     }
     return;
   }
@@ -152,7 +161,14 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
   /* Prevent unused argument(s) compilation warning */
   UNUSED(hrtc);
 
+  // 每秒时钟增一单位
   time_add(&time_now);
+
+  // 检测是否鸣响
+  if (time_now.hour == alarm_setting.time_alart.hour && time_now.minute == alarm_setting.time_alart.minute && time_now.second == alarm_setting.time_alart.second)
+  {
+    alarm_setting.alarming_time = 60000; // 响铃60秒
+  }
   return;
 }
 
@@ -223,8 +239,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
           time_now.second = 59;
         }
         break;
-
-      case 3:
+      }
+    case 5: // 闹钟设定界面，调整对应值
+      switch (screen.screen_display_choose)
+      {
+      case 0:
         alarm_setting.time_alart.hour += encoder_state.Right - encoder_state.Left;
         if (alarm_setting.time_alart.hour > 23)
         {
@@ -236,7 +255,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         }
         break;
 
-      case 4:
+      case 1:
         alarm_setting.time_alart.minute += encoder_state.Right - encoder_state.Left;
         if (alarm_setting.time_alart.minute > 59)
         {
@@ -248,7 +267,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         }
         break;
 
-      case 5:
+      case 2:
         alarm_setting.time_alart.second += encoder_state.Right - encoder_state.Left;
         if (alarm_setting.time_alart.second > 59)
         {
@@ -257,6 +276,17 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         if (alarm_setting.time_alart.second < 0)
         {
           alarm_setting.time_alart.second = 59;
+        }
+        break;
+      case 3:
+        alarm_setting.alarm_frequency += encoder_state.Right - encoder_state.Left;
+        if (alarm_setting.alarm_frequency > 10)
+        {
+          alarm_setting.alarm_frequency = 0;
+        }
+        if (alarm_setting.alarm_frequency < 0)
+        {
+          alarm_setting.alarm_frequency = 10;
         }
         break;
       }
@@ -377,7 +407,7 @@ int main(void)
     else
     {
       // 处理alarm
-      if ((alarm_setting.alarming_time / (500 / alarm_setting.alarm_frequency)) % 2 != 0)
+      if ((alarm_setting.alarming_time / (500 / alarm_setting.alarm_frequency)) % 2 == 0)
       {
         HAL_GPIO_WritePin(BEEP_GPIO_Port, BEEP_Pin, GPIO_PIN_RESET);
         led_control.LedpwmVal = 0; // 占空比100%
@@ -396,7 +426,7 @@ int main(void)
     __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2, led_control.LedpwmVal);
 
     // while 函数不用执行太快
-    HAL_Delay(10);
+    HAL_Delay(7);
   }
   /* USER CODE END 3 */
 }
