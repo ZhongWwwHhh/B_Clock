@@ -153,6 +153,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     case 5: // 闹钟设定界面，进入下一项，直到结束
       screen.screen_display_choose++;
       break;
+
+    case 10: // 闹钟提示界面，按下回主界面
+      screen.screen_display_num = 1;
+      screen.screen_display_choose = -1;
+      screen.clean_display = 1;
+      break;
     }
     return;
   }
@@ -170,6 +176,10 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
   if (time_now.hour == alarm_setting.time_alart.hour && time_now.minute == alarm_setting.time_alart.minute && time_now.second == alarm_setting.time_alart.second)
   {
     alarm_setting.alarming_time = 60000; // 响铃60秒
+    // 进入鸣响提示界面
+    screen.screen_display_num = 10;
+    screen.clean_display = 1;
+    screen.screen_display_choose = -1;
   }
   return;
 }
@@ -242,6 +252,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         }
         break;
       }
+      break;
+
     case 5: // 闹钟设定界面，调整对应值
       switch (screen.screen_display_choose)
       {
@@ -292,6 +304,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         }
         break;
       }
+      break;
+
+    case 10: // 闹钟提示界面，回主界面，延时响铃
+      screen.screen_display_num = 1;
+      screen.screen_display_choose = -1;
+      screen.clean_display = 1;
+      break;
     }
 
     // 丢弃
@@ -421,6 +440,7 @@ int main(void)
 
   // 1.显示主界面
   screen.screen_display_num = 1;
+  screen.screen_display_choose = -1;
   screen.clean_display = 1;
 
   /* USER CODE END 2 */

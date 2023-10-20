@@ -79,10 +79,11 @@ void screen_show(int8_t *screen_display_num, int8_t *clean_display)
         OLED_ShowNum(92, 12, time_now.minute, 2, 8, screen.screen_display_choose == 1 ? 0 : 1);
         OLED_ShowString(0, 22, "Second:", 8, screen.screen_display_choose == 2 ? 0 : 1);
         OLED_ShowNum(42, 22, time_now.second, 2, 8, screen.screen_display_choose == 2 ? 0 : 1);
-
+        // 显示提示
+        OLED_ShowString(16, 50, "Press to next", 8, 1);
         break;
 
-    case 5: // 时间设定界面
+    case 5: // 闹钟设定界面
         if (screen.screen_display_choose > 3)
         {
             // 已经完成设置，回主界面
@@ -100,6 +101,22 @@ void screen_show(int8_t *screen_display_num, int8_t *clean_display)
         OLED_ShowNum(42, 22, alarm_setting.time_alart.second, 2, 8, screen.screen_display_choose == 2 ? 0 : 1);
         OLED_ShowString(0, 32, "Frequency:", 8, screen.screen_display_choose == 3 ? 0 : 1);
         OLED_ShowNum(60, 32, alarm_setting.alarm_frequency, 2, 8, screen.screen_display_choose == 3 ? 0 : 1);
+        // 显示提示
+        OLED_ShowString(16, 50, "Press to next", 8, 1);
+        break;
+
+    case 10: // 闹钟鸣响提示界面
+        OLED_ShowString(16, 2, "Alarming", 16, 1);
+        OLED_ShowNum(16, 20, time_now.hour, 2, 24, 1);
+        OLED_ShowChar(40, 20, ':', 16, 1);
+        OLED_ShowNum(52, 20, time_now.minute, 2, 24, 1);
+        OLED_ShowChar(76, 20, ':', 16, 1);
+        OLED_ShowNum(88, 20, time_now.second, 2, 24, 1);
+
+        // 显示提示
+        OLED_ShowString(16, 40, "Rotate to dalay", 8, 1);
+        OLED_ShowString(16, 50, "Press to stop", 8, 1);
+        break;
     };
 
     OLED_Refresh();
