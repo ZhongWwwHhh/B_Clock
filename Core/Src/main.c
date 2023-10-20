@@ -286,7 +286,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         {
           alarm_setting.alarm_frequency = 0;
         }
-        if (alarm_setting.alarm_frequency < 0)
+        if (alarm_setting.alarm_frequency < 1)
         {
           alarm_setting.alarm_frequency = 10;
         }
