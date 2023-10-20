@@ -54,6 +54,7 @@ RTC_HandleTypeDef hrtc;
 
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
+TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim5;
 
 UART_HandleTypeDef huart1;
@@ -86,6 +87,7 @@ static void MX_USART1_UART_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_TIM5_Init(void);
 static void MX_TIM2_Init(void);
+static void MX_TIM4_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -299,6 +301,47 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     // 屏显
     screen_show(&screen.screen_display_num, &screen.clean_display);
   }
+  // 确认是tim4 100hz中断
+  if (htim == (&htim4))
+  {
+    // 闲时LED保持呼吸，不响铃
+    if (!alarm_setting.alarming_time)
+    {
+      // 不响铃
+      HAL_GPIO_WritePin(BEEP_GPIO_Port, BEEP_Pin, GPIO_PIN_SET);
+      // 呼吸
+      if (led_control.LedpwmVal_Dir)
+        led_control.LedpwmVal += 2;
+      else
+        led_control.LedpwmVal -= 2;
+
+      if (led_control.LedpwmVal >= 98)
+        led_control.LedpwmVal_Dir = 0; // 切换为PWM值减
+
+      if (led_control.LedpwmVal <= 1)
+        led_control.LedpwmVal_Dir = 1; // 切换为PWM值增
+    }
+    else
+    {
+      // 处理alarm
+      if ((alarm_setting.alarming_time / (500 / alarm_setting.alarm_frequency)) % 2 == 0)
+      {
+        HAL_GPIO_WritePin(BEEP_GPIO_Port, BEEP_Pin, GPIO_PIN_RESET);
+        led_control.LedpwmVal = 0; // 占空比100%
+        led_control.LedpwmVal_Dir = 1;
+      }
+      else
+      {
+        HAL_GPIO_WritePin(BEEP_GPIO_Port, BEEP_Pin, GPIO_PIN_SET);
+        led_control.LedpwmVal = 100; // 占空比0%
+        led_control.LedpwmVal_Dir = 0;
+      }
+
+      alarm_setting.alarming_time -= 10; // 对alarm剩余时间减一单位
+    }
+    // 更新led pwm配置
+    __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2, led_control.LedpwmVal);
+  }
 }
 
 /* USER CODE END 0 */
@@ -337,6 +380,7 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM5_Init();
   MX_TIM2_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
 
   // 初始化状态检测
@@ -350,6 +394,8 @@ int main(void)
 
   // 启用tim2 10hz
   HAL_TIM_Base_Start_IT(&htim2);
+  // 启用tim4 100hz
+  HAL_TIM_Base_Start_IT(&htim4);
 
   // 启动LED的PWM
   HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_2);
@@ -386,44 +432,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
-    // 闲时LED保持呼吸，不响铃
-    if (!alarm_setting.alarming_time)
-    {
-      // 不响铃
-      HAL_GPIO_WritePin(BEEP_GPIO_Port, BEEP_Pin, GPIO_PIN_SET);
-      // 呼吸
-      if (led_control.LedpwmVal_Dir)
-        led_control.LedpwmVal += 2;
-      else
-        led_control.LedpwmVal -= 2;
-
-      if (led_control.LedpwmVal >= 98)
-        led_control.LedpwmVal_Dir = 0; // 切换为PWM值递减状态
-
-      if (led_control.LedpwmVal <= 1)
-        led_control.LedpwmVal_Dir = 1; // 切换为PWM值递增状态
-    }
-    else
-    {
-      // 处理alarm
-      if ((alarm_setting.alarming_time / (500 / alarm_setting.alarm_frequency)) % 2 == 0)
-      {
-        HAL_GPIO_WritePin(BEEP_GPIO_Port, BEEP_Pin, GPIO_PIN_RESET);
-        led_control.LedpwmVal = 0; // 占空比100%
-        led_control.LedpwmVal_Dir = 1;
-      }
-      else
-      {
-        HAL_GPIO_WritePin(BEEP_GPIO_Port, BEEP_Pin, GPIO_PIN_SET);
-        led_control.LedpwmVal = 100; // 占空比0%
-        led_control.LedpwmVal_Dir = 0;
-      }
-
-      alarm_setting.alarming_time -= 10; // 对alarm剩余时间减一单位
-    }
-    // 更新led pwm配置
-    __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2, led_control.LedpwmVal);
 
     // while 函数不用执行太快
     HAL_Delay(7);
@@ -684,6 +692,50 @@ static void MX_TIM3_Init(void)
   /* USER CODE BEGIN TIM3_Init 2 */
 
   /* USER CODE END TIM3_Init 2 */
+}
+
+/**
+ * @brief TIM4 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_TIM4_Init(void)
+{
+
+  /* USER CODE BEGIN TIM4_Init 0 */
+
+  /* USER CODE END TIM4_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM4_Init 1 */
+
+  /* USER CODE END TIM4_Init 1 */
+  htim4.Instance = TIM4;
+  htim4.Init.Prescaler = 719;
+  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim4.Init.Period = 999;
+  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim4, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM4_Init 2 */
+
+  /* USER CODE END TIM4_Init 2 */
 }
 
 /**
