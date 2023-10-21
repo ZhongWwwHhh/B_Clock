@@ -72,6 +72,7 @@ target_link_options(
 
 target_sources(
     ${TARGET_NAME} PRIVATE
+    "Core\\Src\\bluetooth.c"
     "Core\\Src\\encoder.c"
     "Core\\Src\\error.c"
     "Core\\Src\\LM75A.c"
