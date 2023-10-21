@@ -154,10 +154,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
       screen.screen_display_choose++;
       break;
 
-    case 10: // 闹钟提示界面，按下回主界面
+    case 10: // 闹钟提示界面，按下停止，回主界面
       screen.screen_display_num = 1;
       screen.screen_display_choose = -1;
       screen.clean_display = 1;
+      // 清空延时响铃
+      alarm_setting.is_alarm_delayed = 0;
       break;
     }
     return;
