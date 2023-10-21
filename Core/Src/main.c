@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdlib.h>
+#include <string.h>
 #include "struct_define.h"
 #include "time_control.h"
 #include "oled.h"
@@ -76,6 +77,11 @@ Encoder_State encoder_state = {0, 0}; // 初始时没有左右旋
 // 记录温度
 extern TempDataStruct Tempdata;
 
+// 蓝牙
+uint8_t Rx_String[100];
+uint8_t Rx_Flag = 0;
+uint8_t Rx_buff;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -94,6 +100,23 @@ static void MX_TIM4_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  if (huart == &huart1)
+  {
+    Rx_String[Rx_Flag++] = Rx_buff;     // 接收字符
+    if (Rx_String[Rx_Flag - 1] == 0x0A) // 判断是否接收结束
+    {
+      HAL_UART_Transmit(&huart1, (uint8_t *)&Rx_String, Rx_Flag, 0xFFFF); // 字符串发送
+      while (HAL_UART_GetState(&huart1) == HAL_UART_STATE_BUSY_TX)
+        ;                                       // 判断发送是否完毕
+      memset(Rx_String, 0x00, sizeof(Rx_buff)); // 清空接收字符串
+      Rx_Flag = 0;                              // 清空计数器
+    }
+    HAL_UART_Receive_IT(&huart1, (uint8_t *)&Rx_buff, 1); // 再开启接收中断
+  }
+}
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
@@ -465,6 +488,9 @@ int main(void)
 
   // 不在响铃状态
   alarm_setting.alarming_time = 0;
+
+  // 开启蓝牙接收中断
+  HAL_UART_Receive_IT(&huart1, &Rx_buff, 1);
 
   // 开启oled
   OLED_DisPlay_On();
