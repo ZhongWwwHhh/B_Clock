@@ -54,6 +54,13 @@ typedef struct
     uint8_t Right;
 } Encoder_State;
 
+// 蓝牙相关配置
+typedef struct
+{
+    uint16_t bluetooth_pin;
+    uint8_t bluetooth_pin_str[5];
+} Bluetooth_Setting;
+
 #endif
 
 /* USER CODE END 0 */

@@ -6,6 +6,7 @@ extern Alarm_Setting alarm_setting;
 extern TempDataStruct Tempdata;
 extern Encoder_State encoder_state;
 extern Screen screen;
+extern Bluetooth_Setting bluetooth_setting;
 
 void screen_show(int8_t *screen_display_num, int8_t *clean_display)
 {
@@ -58,7 +59,8 @@ void screen_show(int8_t *screen_display_num, int8_t *clean_display)
         break;
 
     case 3: // 蓝牙画面
-        OLED_ShowString(0, 2, "PIN: 1234", 16, 1);
+        OLED_ShowString(0, 2, "PIN: ", 16, 1);
+        OLED_ShowNum(45, 2, bluetooth_setting.bluetooth_pin, 4, 16, 1);
         OLED_ShowString(0, 20, "Connect and Set", 8, 1);
         OLED_ShowString(16, 50, "Press to back", 8, 1);
         break;

@@ -75,6 +75,8 @@ Screen screen;
 Led_Control led_control = {0, 1}; // LED 呼吸灯控制
 // 编码器状态
 Encoder_State encoder_state = {0, 0}; // 初始时没有左右旋
+// 蓝牙设置
+Bluetooth_Setting bluetooth_setting;
 
 // 记录温度
 extern TempDataStruct Tempdata;
@@ -488,6 +490,23 @@ int main(void)
 
   // 不在响铃状态
   alarm_setting.alarming_time = 0;
+
+  // 初始化蓝牙
+  // 设置pin
+  bluetooth_setting.bluetooth_pin = rand() % 10000;
+  if (bluetooth_setting.bluetooth_pin < 1000)
+  {
+    bluetooth_setting.bluetooth_pin += 1000;
+  }
+  itoa(bluetooth_setting.bluetooth_pin, bluetooth_setting.bluetooth_pin_str, 10);
+  uint8_t bluetooth_cmd[20] = "AT+PIN";
+  strcat(bluetooth_cmd, bluetooth_setting.bluetooth_pin_str);
+  strcat(bluetooth_cmd, "\r\n");
+  HAL_UART_Transmit(&huart1, bluetooth_cmd, strlen(bluetooth_cmd), 500);
+
+  // 蓝牙确认pin
+  HAL_UART_Transmit(&huart1, "AT+PIN\r\n", 8, 500);
+  HAL_Delay(10);
 
   // 开启蓝牙接收中断
   HAL_UARTEx_ReceiveToIdle_DMA(&huart1, Rx_String, sizeof(Rx_String));
