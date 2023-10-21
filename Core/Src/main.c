@@ -99,6 +99,7 @@ static void MX_TIM3_Init(void);
 static void MX_TIM5_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM4_Init(void);
+static void MX_ADC1_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -499,12 +500,8 @@ int main(void)
   __HAL_DMA_DISABLE_IT(&hdma_usart1_rx, DMA_IT_HT);
 
   // 设置pin
-  // 开启adc
-  HAL_ADC_Start(&hadc1);
-  // 等待ADC转换完成
-  HAL_ADC_PollForConversion(&hadc1, 500);
-  // 以adc数值作为随机数源
-  srand((unsigned int)HAL_ADC_GetValue(&hadc1));
+  HAL_Delay(10);
+  srand(Tempdata.TempAll);
   bluetooth_setting.bluetooth_pin = rand() % 10000;
   if (bluetooth_setting.bluetooth_pin < 1000)
   {
@@ -617,7 +614,7 @@ static void MX_ADC1_Init(void)
   /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
    */
   hadc1.Instance = ADC1;
-  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV8;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV6;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
   hadc1.Init.ScanConvMode = DISABLE;
   hadc1.Init.ContinuousConvMode = DISABLE;
@@ -635,7 +632,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
    */
-  sConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
+  sConfig.Channel = ADC_CHANNEL_0;
   sConfig.Rank = 1;
   sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
