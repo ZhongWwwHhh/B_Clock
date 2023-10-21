@@ -501,10 +501,10 @@ int main(void)
   // 设置pin
   // 开启adc
   HAL_ADC_Start(&hadc1);
-  // 等待ADC转换完成，超时为100ms
-  HAL_ADC_PollForConversion(&hadc1, 100);
+  // 等待ADC转换完成
+  HAL_ADC_PollForConversion(&hadc1, 500);
   // 以adc数值作为随机数源
-  srand(HAL_ADC_GetValue(&hadc1));
+  srand((unsigned int)HAL_ADC_GetValue(&hadc1));
   bluetooth_setting.bluetooth_pin = rand() % 10000;
   if (bluetooth_setting.bluetooth_pin < 1000)
   {
@@ -617,7 +617,7 @@ static void MX_ADC1_Init(void)
   /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
    */
   hadc1.Instance = ADC1;
-  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV8;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
   hadc1.Init.ScanConvMode = DISABLE;
   hadc1.Init.ContinuousConvMode = DISABLE;
