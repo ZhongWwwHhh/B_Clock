@@ -59,6 +59,8 @@ TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim5;
 
 UART_HandleTypeDef huart1;
+DMA_HandleTypeDef hdma_usart1_rx;
+DMA_HandleTypeDef hdma_usart1_tx;
 
 /* USER CODE BEGIN PV */
 
@@ -78,15 +80,14 @@ Encoder_State encoder_state = {0, 0}; // 初始时没有左右旋
 extern TempDataStruct Tempdata;
 
 // 蓝牙
-uint8_t Rx_String[100];
-uint8_t Rx_Flag = 0;
-uint8_t Rx_buff;
+uint8_t Rx_String[50];
 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_RTC_Init(void);
 static void MX_USART1_UART_Init(void);
@@ -101,23 +102,19 @@ static void MX_TIM4_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+// 蓝牙接收中断
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
   if (huart == &huart1)
   {
-    Rx_String[Rx_Flag++] = Rx_buff;     // 接收字符
-    if (Rx_String[Rx_Flag - 1] == 0x0A) // 判断是否接收结束
-    {
-      HAL_UART_Transmit(&huart1, (uint8_t *)&Rx_String, Rx_Flag, 0xFFFF); // 字符串发送
-      while (HAL_UART_GetState(&huart1) == HAL_UART_STATE_BUSY_TX)
-        ;                                       // 判断发送是否完毕
-      memset(Rx_String, 0x00, sizeof(Rx_buff)); // 清空接收字符串
-      Rx_Flag = 0;                              // 清空计数器
-    }
-    HAL_UART_Receive_IT(&huart1, (uint8_t *)&Rx_buff, 1); // 再开启接收中断
+    HAL_UART_Transmit_DMA(&huart1, Rx_String, Size);
+
+    HAL_UARTEx_ReceiveToIdle_DMA(&huart1, Rx_String, sizeof(Rx_String));
+    __HAL_DMA_DISABLE_IT(&hdma_usart1_rx, DMA_IT_HT);
   }
 }
 
+// 按键中断
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
   if (GPIO_Pin == KEY_Pin)
@@ -189,6 +186,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   }
 }
 
+// 时钟中断
 void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
 {
   /* Prevent unused argument(s) compilation warning */
@@ -232,6 +230,7 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
   return;
 }
 
+// 定时中断
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* Prevent unused argument(s) compilation warning */
@@ -449,6 +448,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_I2C1_Init();
   MX_RTC_Init();
   MX_USART1_UART_Init();
@@ -490,7 +490,8 @@ int main(void)
   alarm_setting.alarming_time = 0;
 
   // 开启蓝牙接收中断
-  HAL_UART_Receive_IT(&huart1, &Rx_buff, 1);
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart1, Rx_String, sizeof(Rx_String));
+  __HAL_DMA_DISABLE_IT(&hdma_usart1_rx, DMA_IT_HT);
 
   // 开启oled
   OLED_DisPlay_On();
@@ -518,7 +519,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
     // while 函数不用执行太快
-    HAL_Delay(7);
+    HAL_Delay(1000);
   }
   /* USER CODE END 3 */
 }
@@ -900,6 +901,24 @@ static void MX_USART1_UART_Init(void)
   /* USER CODE BEGIN USART1_Init 2 */
 
   /* USER CODE END USART1_Init 2 */
+}
+
+/**
+ * Enable DMA controller clock
+ */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA2_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA2_Stream2_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
+  /* DMA2_Stream7_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream7_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream7_IRQn);
 }
 
 /**
