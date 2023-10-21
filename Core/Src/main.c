@@ -461,6 +461,7 @@ int main(void)
   MX_TIM5_Init();
   MX_TIM2_Init();
   MX_TIM4_Init();
+  MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
 
   // 初始化状态检测
@@ -500,8 +501,9 @@ int main(void)
   __HAL_DMA_DISABLE_IT(&hdma_usart1_rx, DMA_IT_HT);
 
   // 设置pin
-  HAL_Delay(10);
-  srand(Tempdata.TempAll);
+  HAL_ADC_Start(&hadc1);
+  HAL_ADC_PollForConversion(&hadc1, 100);
+  srand(HAL_ADC_GetValue(&hadc1));
   bluetooth_setting.bluetooth_pin = rand() % 10000;
   if (bluetooth_setting.bluetooth_pin < 1000)
   {
@@ -614,7 +616,7 @@ static void MX_ADC1_Init(void)
   /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
    */
   hadc1.Instance = ADC1;
-  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV6;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
   hadc1.Init.ScanConvMode = DISABLE;
   hadc1.Init.ContinuousConvMode = DISABLE;

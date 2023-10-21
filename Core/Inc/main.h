@@ -59,8 +59,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define ADC_RAND_SEED_Pin GPIO_PIN_0
-#define ADC_RAND_SEED_GPIO_Port GPIOA
 #define LED_Pin GPIO_PIN_1
 #define LED_GPIO_Port GPIOA
 #define SPI_Screen_CS_Pin GPIO_PIN_4
