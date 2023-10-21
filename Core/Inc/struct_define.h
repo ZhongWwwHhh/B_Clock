@@ -19,6 +19,12 @@ typedef struct
     int8_t alarm_frequency;
     // 闹钟时间
     Times time_alart;
+
+    // 是否已经延时
+    int8_t is_alarm_delayed;
+    // 下一次响铃时间，延时再响用
+    Times time_alart_real;
+
     // 是否在响铃
     int16_t alarming_time;
 } Alarm_Setting;

@@ -180,6 +180,29 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
     screen.screen_display_num = 10;
     screen.clean_display = 1;
     screen.screen_display_choose = -1;
+    // 重置延时响铃
+    alarm_setting.is_alarm_delayed = 0;
+    alarm_setting.time_alart_real.hour = alarm_setting.time_alart.hour;
+    alarm_setting.time_alart_real.minute = alarm_setting.time_alart.minute;
+    alarm_setting.time_alart_real.second = alarm_setting.time_alart.second;
+  }
+
+  // 检测延时响铃，最多三次
+  if (alarm_setting.is_alarm_delayed > 0 && alarm_setting.is_alarm_delayed < 4)
+  {
+    if (time_now.hour == alarm_setting.time_alart_real.hour && time_now.minute == alarm_setting.time_alart_real.minute && time_now.second == alarm_setting.time_alart_real.second)
+    {
+      alarm_setting.alarming_time = 60000; // 响铃60秒
+      // 进入鸣响提示界面
+      screen.screen_display_num = 10;
+      screen.clean_display = 1;
+      screen.screen_display_choose = -1;
+    }
+  }
+  else
+  {
+    // 已经延时三次了，重置
+    alarm_setting.is_alarm_delayed = 0;
   }
   return;
 }
@@ -199,118 +222,126 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     encoder_get_state();
 
     // 根据界面决定encoder值更改位置
-    switch (screen.screen_display_num)
+    if (encoder_state.Left || encoder_state.Right)
     {
-    case 0: // 开机界面，丢弃
-      break;
-
-    case 1: // 主界面，丢弃
-      break;
-
-    case 2: // 设置界面，选择条目
-      screen.screen_display_choose += encoder_state.Right - encoder_state.Left;
-      break;
-
-    case 3: // 蓝牙界面，丢弃
-      break;
-
-    case 4: // 时间设定界面，调整对应值
-      switch (screen.screen_display_choose)
+      switch (screen.screen_display_num)
       {
-      case 0:
-        time_now.hour += encoder_state.Right - encoder_state.Left;
-        if (time_now.hour > 23)
-        {
-          time_now.hour = 0;
-        }
-        if (time_now.hour < 0)
-        {
-          time_now.hour = 23;
-        }
+      case 0: // 开机界面，丢弃
         break;
-      case 1:
-        time_now.minute += encoder_state.Right - encoder_state.Left;
-        if (time_now.minute > 59)
+
+      case 1: // 主界面，丢弃
+        break;
+
+      case 2: // 设置界面，选择条目
+        screen.screen_display_choose += encoder_state.Right - encoder_state.Left;
+        break;
+
+      case 3: // 蓝牙界面，丢弃
+        break;
+
+      case 4: // 时间设定界面，调整对应值
+        switch (screen.screen_display_choose)
         {
-          time_now.minute = 0;
-        }
-        if (time_now.minute < 0)
-        {
-          time_now.minute = 59;
+        case 0:
+          time_now.hour += encoder_state.Right - encoder_state.Left;
+          if (time_now.hour > 23)
+          {
+            time_now.hour = 0;
+          }
+          if (time_now.hour < 0)
+          {
+            time_now.hour = 23;
+          }
+          break;
+        case 1:
+          time_now.minute += encoder_state.Right - encoder_state.Left;
+          if (time_now.minute > 59)
+          {
+            time_now.minute = 0;
+          }
+          if (time_now.minute < 0)
+          {
+            time_now.minute = 59;
+          }
+          break;
+
+        case 2:
+          time_now.second += encoder_state.Right - encoder_state.Left;
+          if (time_now.second > 59)
+          {
+            time_now.second = 0;
+          }
+          if (time_now.second < 0)
+          {
+            time_now.second = 59;
+          }
+          break;
         }
         break;
 
-      case 2:
-        time_now.second += encoder_state.Right - encoder_state.Left;
-        if (time_now.second > 59)
+      case 5: // 闹钟设定界面，调整对应值
+        switch (screen.screen_display_choose)
         {
-          time_now.second = 0;
+        case 0:
+          alarm_setting.time_alart.hour += encoder_state.Right - encoder_state.Left;
+          if (alarm_setting.time_alart.hour > 23)
+          {
+            alarm_setting.time_alart.hour = 0;
+          }
+          if (alarm_setting.time_alart.hour < 0)
+          {
+            alarm_setting.time_alart.hour = 23;
+          }
+          break;
+
+        case 1:
+          alarm_setting.time_alart.minute += encoder_state.Right - encoder_state.Left;
+          if (alarm_setting.time_alart.minute > 59)
+          {
+            alarm_setting.time_alart.minute = 0;
+          }
+          if (alarm_setting.time_alart.minute < 0)
+          {
+            alarm_setting.time_alart.minute = 59;
+          }
+          break;
+
+        case 2:
+          alarm_setting.time_alart.second += encoder_state.Right - encoder_state.Left;
+          if (alarm_setting.time_alart.second > 59)
+          {
+            alarm_setting.time_alart.second = 0;
+          }
+          if (alarm_setting.time_alart.second < 0)
+          {
+            alarm_setting.time_alart.second = 59;
+          }
+          break;
+        case 3:
+          alarm_setting.alarm_frequency += encoder_state.Right - encoder_state.Left;
+          if (alarm_setting.alarm_frequency > 10)
+          {
+            alarm_setting.alarm_frequency = 0;
+          }
+          if (alarm_setting.alarm_frequency < 1)
+          {
+            alarm_setting.alarm_frequency = 10;
+          }
+          break;
         }
-        if (time_now.second < 0)
-        {
-          time_now.second = 59;
-        }
+        break;
+
+      case 10: // 闹钟提示界面，回主界面，延时响铃
+        screen.screen_display_num = 1;
+        screen.screen_display_choose = -1;
+        screen.clean_display = 1;
+        // 停止响铃
+        alarm_setting.alarming_time = 0;
+        // 延时加一次
+        alarm_setting.is_alarm_delayed++;
+        time_alarm_delay(&alarm_setting);
         break;
       }
-      break;
-
-    case 5: // 闹钟设定界面，调整对应值
-      switch (screen.screen_display_choose)
-      {
-      case 0:
-        alarm_setting.time_alart.hour += encoder_state.Right - encoder_state.Left;
-        if (alarm_setting.time_alart.hour > 23)
-        {
-          alarm_setting.time_alart.hour = 0;
-        }
-        if (alarm_setting.time_alart.hour < 0)
-        {
-          alarm_setting.time_alart.hour = 23;
-        }
-        break;
-
-      case 1:
-        alarm_setting.time_alart.minute += encoder_state.Right - encoder_state.Left;
-        if (alarm_setting.time_alart.minute > 59)
-        {
-          alarm_setting.time_alart.minute = 0;
-        }
-        if (alarm_setting.time_alart.minute < 0)
-        {
-          alarm_setting.time_alart.minute = 59;
-        }
-        break;
-
-      case 2:
-        alarm_setting.time_alart.second += encoder_state.Right - encoder_state.Left;
-        if (alarm_setting.time_alart.second > 59)
-        {
-          alarm_setting.time_alart.second = 0;
-        }
-        if (alarm_setting.time_alart.second < 0)
-        {
-          alarm_setting.time_alart.second = 59;
-        }
-        break;
-      case 3:
-        alarm_setting.alarm_frequency += encoder_state.Right - encoder_state.Left;
-        if (alarm_setting.alarm_frequency > 10)
-        {
-          alarm_setting.alarm_frequency = 0;
-        }
-        if (alarm_setting.alarm_frequency < 1)
-        {
-          alarm_setting.alarm_frequency = 10;
-        }
-        break;
-      }
-      break;
-
-    case 10: // 闹钟提示界面，回主界面，延时响铃
-      screen.screen_display_num = 1;
-      screen.screen_display_choose = -1;
-      screen.clean_display = 1;
-      break;
     }
 
     // 丢弃
@@ -425,6 +456,11 @@ int main(void)
   alarm_setting.time_alart.hour = 0;
   alarm_setting.time_alart.minute = 0;
   alarm_setting.time_alart.second = 0;
+  alarm_setting.time_alart_real.hour = 0;
+  alarm_setting.time_alart_real.minute = 0;
+  alarm_setting.time_alart_real.second = 0;
+  alarm_setting.is_alarm_delayed = 0;
+
   // 不在响铃状态
   alarm_setting.alarming_time = 0;
 
