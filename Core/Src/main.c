@@ -492,7 +492,12 @@ int main(void)
   alarm_setting.alarming_time = 0;
 
   // 初始化蓝牙
+  // 开启蓝牙接收中断
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart1, Rx_String, sizeof(Rx_String));
+  __HAL_DMA_DISABLE_IT(&hdma_usart1_rx, DMA_IT_HT);
+
   // 设置pin
+  srand(SysTick->VAL);
   bluetooth_setting.bluetooth_pin = rand() % 10000;
   if (bluetooth_setting.bluetooth_pin < 1000)
   {
@@ -503,14 +508,6 @@ int main(void)
   strcat(bluetooth_cmd, bluetooth_setting.bluetooth_pin_str);
   strcat(bluetooth_cmd, "\r\n");
   HAL_UART_Transmit(&huart1, bluetooth_cmd, strlen(bluetooth_cmd), 500);
-
-  // 蓝牙确认pin
-  HAL_UART_Transmit(&huart1, "AT+PIN\r\n", 8, 500);
-  HAL_Delay(10);
-
-  // 开启蓝牙接收中断
-  HAL_UARTEx_ReceiveToIdle_DMA(&huart1, Rx_String, sizeof(Rx_String));
-  __HAL_DMA_DISABLE_IT(&hdma_usart1_rx, DMA_IT_HT);
 
   // 开启oled
   OLED_DisPlay_On();
