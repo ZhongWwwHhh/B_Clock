@@ -30,6 +30,7 @@
 #include "LM75A.h"
 #include "screen_content.h"
 #include "encoder.h"
+#include "bluetooth.h"
 // #include "oledfont.h"
 /* USER CODE END Includes */
 
@@ -112,7 +113,32 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
   if (huart == &huart1)
   {
-    HAL_UART_Transmit_DMA(&huart1, Rx_String, Size);
+    if (bluetooth_matchRegex("^(now|alm)\\s(00|01|02|03|04|05|06|07|08|09|10|11|12|13|14|15|16|17|18|19|20|21|22|23)\\s[0-5][0-9]\\s[0-5][0-9]", Rx_String))
+    {
+      uint8_t temp[2];
+      temp[0] = Rx_String[4];
+      temp[1] = Rx_String[5];
+      time_now.hour = atoi(temp);
+      temp[0] = Rx_String[7];
+      temp[1] = Rx_String[8];
+      time_now.minute = atoi(temp);
+      temp[0] = Rx_String[10];
+      temp[1] = Rx_String[11];
+      time_now.second = atoi(temp);
+      HAL_UART_Transmit_DMA(&huart1, "ok", 2);
+    }
+    else if (bluetooth_matchRegex("^(frq)\\s(0[1-9]|10)", Rx_String))
+    {
+      uint8_t temp[2];
+      temp[0] = Rx_String[4];
+      temp[1] = Rx_String[5];
+      alarm_setting.alarm_frequency = atoi(temp);
+      HAL_UART_Transmit_DMA(&huart1, "ok", 2);
+    }
+    else
+    {
+      HAL_UART_Transmit_DMA(&huart1, "error", 5);
+    }
 
     HAL_UARTEx_ReceiveToIdle_DMA(&huart1, Rx_String, sizeof(Rx_String));
     __HAL_DMA_DISABLE_IT(&hdma_usart1_rx, DMA_IT_HT);
