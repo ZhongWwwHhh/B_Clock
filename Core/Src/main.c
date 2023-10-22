@@ -156,6 +156,18 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
         bluetooth_send("error", 5);
       }
     }
+    else if (Rx_String[0] == 's' && Rx_String[1] == 't' && Rx_String[2] == 'o' && Rx_String[3] == 'p')
+    {
+      // 停止，回主界面
+      screen.screen_display_num = 1;
+      screen.screen_display_choose = -1;
+      screen.clean_display = 1;
+      // 清除剩余响铃时间
+      alarm_setting.alarming_time = 100;
+      // 清空延时响铃
+      alarm_setting.is_alarm_delayed = 0;
+      bluetooth_send("ok", 2);
+    }
     else
     {
       bluetooth_send("error", 5);
