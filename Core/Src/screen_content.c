@@ -66,9 +66,10 @@ void screen_show(int8_t *screen_display_num, int8_t *clean_display)
         break;
 
     case 3: // 蓝牙画面
-        OLED_ShowString(0, 2, "PIN: ", 16, 1);
-        OLED_ShowNum(45, 2, bluetooth_setting.bluetooth_pin, 4, 16, 1);
-        OLED_ShowString(0, 20, "Connect and Set", 8, 1);
+        OLED_ShowString(2, 2, "PIN: ", 16, 1);
+        OLED_ShowNum(47, 2, bluetooth_setting.bluetooth_pin, 4, 16, 1);
+        OLED_ShowString(2, 20, "NAME: Clock", 16, 1);
+        OLED_ShowString(2, 38, "Connect and Set", 8, 1);
         OLED_ShowString(16, 50, "Press to back", 8, 1);
         break;
 
@@ -89,7 +90,8 @@ void screen_show(int8_t *screen_display_num, int8_t *clean_display)
         OLED_ShowString(0, 22, "Second:", 8, screen.screen_display_choose == 2 ? 0 : 1);
         OLED_ShowNum(42, 22, time_now.second, 2, 8, screen.screen_display_choose == 2 ? 0 : 1);
         // 显示提示
-        OLED_ShowString(16, 50, "Press to next", 8, 1);
+        OLED_ShowString(0, 44, "Rotate to change", 8, 1);
+        OLED_ShowString(0, 54, "Press to next", 8, 1);
         break;
 
     case 5: // 闹钟设定界面
@@ -111,7 +113,8 @@ void screen_show(int8_t *screen_display_num, int8_t *clean_display)
         OLED_ShowString(0, 32, "Frequency:", 8, screen.screen_display_choose == 3 ? 0 : 1);
         OLED_ShowNum(60, 32, alarm_setting.alarm_frequency, 2, 8, screen.screen_display_choose == 3 ? 0 : 1);
         // 显示提示
-        OLED_ShowString(16, 50, "Press to next", 8, 1);
+        OLED_ShowString(0, 44, "Rotate to change", 8, 1);
+        OLED_ShowString(0, 54, "Press to next", 8, 1);
         break;
 
     case 10: // 闹钟鸣响提示界面
@@ -123,8 +126,11 @@ void screen_show(int8_t *screen_display_num, int8_t *clean_display)
         OLED_ShowNum(88, 20, time_now.second, 2, 24, 1);
 
         // 显示提示
-        OLED_ShowString(16, 40, "Rotate to dalay", 8, 1);
-        OLED_ShowString(16, 50, "Press to stop", 8, 1);
+        if (alarm_setting.is_alarm_delayed <= 2)
+        {
+            OLED_ShowString(16, 44, "Rotate to dalay", 8, 1);
+        }
+        OLED_ShowString(16, 54, "Press to stop", 8, 1);
         break;
     };
 
