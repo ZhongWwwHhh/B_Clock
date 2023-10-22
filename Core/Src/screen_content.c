@@ -42,6 +42,13 @@ void screen_show(int8_t *screen_display_num, int8_t *clean_display)
         OLED_ShowChar(72, 28, '.', 16, 1);
         OLED_ShowNum(80, 28, Tempdata.Decimals, 1, 16, 1);
 
+        // 显示闹钟被delay
+        if (alarm_setting.is_alarm_delayed)
+        {
+            OLED_ShowChar(92, 28, 'D', 16, 1);
+            OLED_ShowNum(100, 28, alarm_setting.is_alarm_delayed, 1, 16, 1);
+        }
+
         // 显示提示
         OLED_ShowString(16, 50, "Press to setting", 8, 1);
         break;

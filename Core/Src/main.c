@@ -309,6 +309,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     // 获取encoder值
     encoder_get_state();
 
+    // 如果在闹钟界面且已经响铃一分钟，自动延时
+    if (screen.screen_display_num == 10 && alarm_setting.alarming_time == 0)
+    {
+      // 闹钟提示界面，回主界面，3次内延时响铃
+      screen.screen_display_num = 1;
+      screen.screen_display_choose = -1;
+      screen.clean_display = 1;
+      time_alarm_delay(&alarm_setting);
+    }
+
     // 根据界面决定encoder值更改位置
     if (encoder_state.Left || encoder_state.Right)
     {
@@ -419,14 +429,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         }
         break;
 
-      case 10: // 闹钟提示界面，回主界面，延时响铃
+      case 10: // 闹钟提示界面，回主界面，3次内延时响铃
         screen.screen_display_num = 1;
         screen.screen_display_choose = -1;
         screen.clean_display = 1;
         // 停止响铃
         alarm_setting.alarming_time = 0;
-        // 延时加一次
-        alarm_setting.is_alarm_delayed++;
+        // 3次内延时加一次
         time_alarm_delay(&alarm_setting);
         break;
       }

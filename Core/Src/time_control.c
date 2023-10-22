@@ -26,15 +26,24 @@ void time_add(Times *time_old)
 // 延时响铃5分钟
 void time_alarm_delay(Alarm_Setting *alarm_setting)
 {
-    alarm_setting->time_alart_real.minute += 5;
-    if (60 <= alarm_setting->time_alart_real.minute)
+    // 3次内延时，否则重置
+    if (alarm_setting->is_alarm_delayed < 3)
     {
-        alarm_setting->time_alart_real.minute %= 60;
-        alarm_setting->time_alart_real.hour++;
+        alarm_setting->time_alart_real.minute += 5;
+        if (60 <= alarm_setting->time_alart_real.minute)
+        {
+            alarm_setting->time_alart_real.minute %= 60;
+            alarm_setting->time_alart_real.hour++;
+        }
+        if (24 <= alarm_setting->time_alart_real.hour)
+        {
+            alarm_setting->time_alart_real.hour = 0;
+        }
+        alarm_setting->is_alarm_delayed++;
     }
-    if (24 <= alarm_setting->time_alart_real.hour)
+    else
     {
-        alarm_setting->time_alart_real.hour = 0;
+        alarm_setting->is_alarm_delayed = 0;
     }
 }
 
