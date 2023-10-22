@@ -70,6 +70,8 @@ DMA_HandleTypeDef hdma_usart1_tx;
 // 定义来自 struct_define.h 的结构体
 // 记录时间
 Times time_now;
+// 记录正计时
+Timing timing;
 // 记录设置
 Alarm_Setting alarm_setting;
 // 记录屏幕内容
@@ -221,6 +223,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         screen.screen_display_choose = -1;
         screen.clean_display = 1;
         break;
+      case 4: // 进入正计时界面
+        screen.screen_display_num = 6;
+        screen.screen_display_choose = -1;
+        screen.clean_display = 1;
+        break;
       }
       break;
 
@@ -236,6 +243,17 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
     case 5: // 闹钟设定界面，进入下一项，直到结束
       screen.screen_display_choose++;
+      break;
+
+    case 6: // 正计时界面，停止，开始
+      if (timing.is_timing)
+      {
+        timing.is_timing = 0;
+      }
+      else
+      {
+        timing.is_timing = 1;
+      }
       break;
 
     case 10: // 闹钟提示界面，按下停止，回主界面
@@ -258,6 +276,12 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
 
   // 每秒时钟增一单位
   time_add(&time_now);
+
+  // 如果在正计时，计时加一单位
+  if (timing.is_timing)
+  {
+    time_add(&timing.time_timing);
+  }
 
   // 检测是否鸣响
   if (time_now.hour == alarm_setting.time_alart.hour && time_now.minute == alarm_setting.time_alart.minute && time_now.second == alarm_setting.time_alart.second)
@@ -426,6 +450,23 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
             alarm_setting.alarm_frequency = 10;
           }
           break;
+        }
+        break;
+
+      case 6: // 正计时界面，左clear，右back
+        if (encoder_state.Left)
+        {
+          // 左clear
+          timing.time_timing.hour = 0;
+          timing.time_timing.minute = 0;
+          timing.time_timing.second = 0;
+        }
+        else
+        {
+          // 右back，回主界面
+          screen.screen_display_num = 1;
+          screen.screen_display_choose = -1;
+          screen.clean_display = 1;
         }
         break;
 

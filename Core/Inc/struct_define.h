@@ -12,6 +12,13 @@ typedef struct
     int8_t second;
 } Times;
 
+// 正计时控制
+typedef struct
+{
+    Times time_timing;
+    int8_t is_timing;
+} Timing;
+
 // 闹钟设置
 typedef struct
 {
