@@ -9,6 +9,9 @@ extern Encoder_State encoder_state;
 extern Screen screen;
 extern Bluetooth_Setting bluetooth_setting;
 
+#include <stdlib.h>
+extern Times time_game;
+
 void screen_show(int8_t *screen_display_num, int8_t *clean_display)
 {
     if (*clean_display)
@@ -147,6 +150,38 @@ void screen_show(int8_t *screen_display_num, int8_t *clean_display)
         }
         OLED_ShowString(16, 54, "Press to stop", 8, 1);
         break;
+
+    case 66: // 小游戏界面
+        OLED_ShowChinese(00, 0, 0, 16, 1);
+        OLED_ShowChinese(16, 0, 1, 16, 1);
+        OLED_ShowChinese(32, 0, 2, 16, 1);
+        OLED_ShowChinese(48, 0, 3, 16, 1);
+        OLED_ShowChinese(64, 0, 4, 16, 1);
+        // OLED_ShowChinese(80, 0, 5, 16, 1);
+        // OLED_ShowChinese(96, 0, 6, 16, 1);
+        // OLED_ShowChinese(114, 0, 7, 16, 1);
+        // OLED_ShowChinese(128, 0, 8, 16, 1);
+
+        OLED_ShowNum(16, 20, time_game.hour, 2, 24, 1);
+        OLED_ShowChar(40, 20, ':', 16, 1);
+        OLED_ShowNum(52, 20, time_game.minute, 2, 24, 1);
+        OLED_ShowChar(76, 20, ':', 16, 1);
+        OLED_ShowNum(88, 20, time_game.second, 2, 24, 1);
+
+        if (time_game.hour == time_now.hour && time_game.minute == time_now.minute && abs(time_game.second - time_now.second) < 3)
+        {
+            OLED_ShowChinese(00, 44, 10, 16, 1);
+            OLED_ShowChinese(16, 44, 11, 16, 1);
+            OLED_ShowChinese(32, 44, 12, 16, 1);
+            OLED_ShowChinese(48, 44, 13, 16, 1);
+        }
+        else
+        {
+            OLED_ShowChinese(00, 44, 15, 16, 1);
+            OLED_ShowChinese(16, 44, 16, 16, 1);
+            OLED_ShowChinese(32, 44, 14, 16, 1);
+            OLED_ShowChinese(48, 44, 14, 16, 1);
+        }
     };
 
     OLED_Refresh();

@@ -83,6 +83,9 @@ Encoder_State encoder_state = {0, 0}; // 初始时没有左右旋
 // 蓝牙设置
 Bluetooth_Setting bluetooth_setting;
 
+// 小游戏
+Times time_game = {0, 0, 0};
+
 // 记录温度
 extern TempDataStruct Tempdata;
 
@@ -191,7 +194,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     // 按界面分情况
     switch (screen.screen_display_num)
     {
-    case 0: // 开机屏幕，忽略
+    case 0: // 开机屏幕，忽略 小游戏
+      screen.screen_display_num = 66;
+      screen.screen_display_choose = 0;
+      screen.clean_display = 1;
       break;
 
     case 1: // 主界面，进设置
@@ -262,6 +268,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
       screen.clean_display = 1;
       // 清空延时响铃
       alarm_setting.is_alarm_delayed = 0;
+      break;
+
+    case 66: // 小游戏，时间加
+      time_add(&time_game);
       break;
     }
     return;
@@ -644,11 +654,14 @@ int main(void)
   screen_show(&screen.screen_display_num, &screen.clean_display);
   HAL_Delay(3000);
 
-  // 1.显示主界面
-  screen.screen_display_num = 1;
-  screen.screen_display_choose = -1;
-  screen.clean_display = 1;
-
+  // 小游戏就不显示了
+  if (screen.screen_display_num != 66)
+  {
+    // 1.显示主界面
+    screen.screen_display_num = 1;
+    screen.screen_display_choose = -1;
+    screen.clean_display = 1;
+  }
   /* USER CODE END 2 */
 
   /* Infinite loop */
