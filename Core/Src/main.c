@@ -113,31 +113,40 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
   if (huart == &huart1)
   {
-    if (bluetooth_matchRegex("^(now|alm)\\s(00|01|02|03|04|05|06|07|08|09|10|11|12|13|14|15|16|17|18|19|20|21|22|23)\\s[0-5][0-9]\\s[0-5][0-9]", Rx_String))
+    if (Rx_String[0] == 'n' && Rx_String[1] == 'o' && Rx_String[2] == 'w')
     {
-      uint8_t temp[2];
-      temp[0] = Rx_String[4];
-      temp[1] = Rx_String[5];
-      time_now.hour = atoi(temp);
-      temp[0] = Rx_String[7];
-      temp[1] = Rx_String[8];
-      time_now.minute = atoi(temp);
-      temp[0] = Rx_String[10];
-      temp[1] = Rx_String[11];
-      time_now.second = atoi(temp);
-      HAL_UART_Transmit_DMA(&huart1, "ok", 2);
+      int8_t new_hour, new_minute, new_second;
+      if ((new_hour = bluetooth_match_num(Rx_String[3], Rx_String[4], Rx_String[5], 00, 23)) != -1 && (new_minute = bluetooth_match_num(Rx_String[6], Rx_String[7], Rx_String[8], 00, 59)) != -1 && (new_second = bluetooth_match_num(Rx_String[9], Rx_String[10], Rx_String[11], 00, 59)) != -1)
+      {
+        time_now.hour = new_hour;
+        time_now.minute = new_minute;
+        time_now.second = new_second;
+        bluetooth_send("ok", 2);
+      }
     }
-    else if (bluetooth_matchRegex("^(frq)\\s(0[1-9]|10)", Rx_String))
+    else if (Rx_String[0] == 'a' && Rx_String[1] == 'l' && Rx_String[2] == 'm')
     {
-      uint8_t temp[2];
-      temp[0] = Rx_String[4];
-      temp[1] = Rx_String[5];
-      alarm_setting.alarm_frequency = atoi(temp);
-      HAL_UART_Transmit_DMA(&huart1, "ok", 2);
+      int8_t new_hour, new_minute, new_second;
+      if ((new_hour = bluetooth_match_num(Rx_String[3], Rx_String[4], Rx_String[5], 00, 23)) != -1 && (new_minute = bluetooth_match_num(Rx_String[6], Rx_String[7], Rx_String[8], 00, 59)) != -1 && (new_second = bluetooth_match_num(Rx_String[9], Rx_String[10], Rx_String[11], 00, 59)) != -1)
+      {
+        alarm_setting.time_alart.hour = new_hour;
+        alarm_setting.time_alart.minute = new_minute;
+        alarm_setting.time_alart.second = new_second;
+        bluetooth_send("ok", 2);
+      }
+    }
+    else if (Rx_String[0] == 'f' && Rx_String[1] == 'r' && Rx_String[2] == 'q')
+    {
+      int8_t frq = 0;
+      if ((frq = bluetooth_match_num(Rx_String[3], Rx_String[4], Rx_String[5], 01, 10)) != -1)
+      {
+        alarm_setting.alarm_frequency = frq;
+        bluetooth_send("ok", 2);
+      }
     }
     else
     {
-      HAL_UART_Transmit_DMA(&huart1, "error", 5);
+      ;
     }
 
     HAL_UARTEx_ReceiveToIdle_DMA(&huart1, Rx_String, sizeof(Rx_String));
@@ -531,6 +540,10 @@ int main(void)
   HAL_UARTEx_ReceiveToIdle_DMA(&huart1, Rx_String, sizeof(Rx_String));
   __HAL_DMA_DISABLE_IT(&hdma_usart1_rx, DMA_IT_HT);
 
+  // 设置广播名
+  HAL_UART_Transmit(&huart1, "AT+NAMECLOCK\r\n", 14, 500);
+  HAL_Delay(50);
+
   // 设置pin
   HAL_ADC_Start(&hadc1);
   HAL_ADC_PollForConversion(&hadc1, 100);
@@ -545,10 +558,6 @@ int main(void)
   strcat(bluetooth_cmd, bluetooth_setting.bluetooth_pin_str);
   strcat(bluetooth_cmd, "\r\n");
   HAL_UART_Transmit(&huart1, bluetooth_cmd, strlen(bluetooth_cmd), 500);
-  HAL_Delay(50);
-
-  // 设置广播名
-  HAL_UART_Transmit(&huart1, "AT+NAMEB-CLOCK\r\n", 16, 500);
   HAL_Delay(50);
 
   // 开启oled

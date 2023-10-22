@@ -4,36 +4,23 @@
 extern UART_HandleTypeDef huart1;
 
 // 向蓝牙模块发送数据
-void bluetooth_send(uint8_t *data, uint8_t len)
+void bluetooth_send(const uint8_t *data, const uint8_t len)
 {
-    for (int i; i < len; i++)
-    {
-        HAL_UART_Transmit(&huart1, &data[i], 1, 1000);
-    }
+    HAL_UART_Transmit_DMA(&huart1, data, len);
 }
 
-bool bluetooth_matchRegex(const uint8_t *pattern, const uint8_t *userString)
+int8_t bluetooth_match_num(uint8_t space, uint8_t num1, uint8_t num2, int8_t limit_min, int8_t limit_max)
 {
-    bool result = false;
-
-    regex_t regex;
-    int regexInit = regcomp(&regex, (char *)pattern, REG_EXTENDED);
-    if (regexInit)
+    if (space == ' ' && isdigit(num1) && isdigit(num2))
     {
-        ; // fail
-    }
-    else
-    {
-        int reti = regexec(&regex, (char *)userString, 0, NULL, 0);
-        if (reti)
+        uint8_t str[2];
+        str[0] = num1;
+        str[1] = num2;
+        int8_t num = atoi(str);
+        if (num >= limit_min && num <= limit_max)
         {
-            // match failed
-        }
-        else
-        {
-            result = true;
+            return num;
         }
     }
-    regfree(&regex);
-    return result;
+    return -1;
 }
