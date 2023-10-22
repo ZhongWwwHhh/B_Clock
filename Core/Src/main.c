@@ -123,6 +123,10 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
         time_now.second = new_second;
         bluetooth_send("ok", 2);
       }
+      else
+      {
+        bluetooth_send("error", 5);
+      }
     }
     else if (Rx_String[0] == 'a' && Rx_String[1] == 'l' && Rx_String[2] == 'm')
     {
@@ -134,6 +138,10 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
         alarm_setting.time_alart.second = new_second;
         bluetooth_send("ok", 2);
       }
+      else
+      {
+        bluetooth_send("error", 5);
+      }
     }
     else if (Rx_String[0] == 'f' && Rx_String[1] == 'r' && Rx_String[2] == 'q')
     {
@@ -143,10 +151,14 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
         alarm_setting.alarm_frequency = frq;
         bluetooth_send("ok", 2);
       }
+      else
+      {
+        bluetooth_send("error", 5);
+      }
     }
     else
     {
-      ;
+      bluetooth_send("error", 5);
     }
 
     HAL_UARTEx_ReceiveToIdle_DMA(&huart1, Rx_String, sizeof(Rx_String));
